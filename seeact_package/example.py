@@ -1,10 +1,13 @@
 import asyncio
 import os
+import litellm
 from seeact.agent import SeeActAgent
 
 # Setup your API Key here, or pass through environment
-# os.environ["OPENAI_API_KEY"] = "Your API KEY Here"
-os.environ["GEMINI_API_KEY"] = "sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
+os.environ["OPENAI_API_KEY"] = "sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
+# os.environ["GEMINI_API_KEY"] = "sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
+
+# litellm.set_verbose = True
 
 async def run_agent():
     agent = SeeActAgent(model="ByteDance-Seed/Seed-OSS-36B-Instruct")

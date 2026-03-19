@@ -27,8 +27,8 @@ from dotenv import load_dotenv
 import litellm
 import base64
 
-EMPTY_API_KEY="sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
-# EMPTY_API_KEY="Your API KEY Here"
+# EMPTY_API_KEY="sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
+EMPTY_API_KEY="Your API KEY Here"
 
 def load_openai_api_key():
     load_dotenv()
@@ -53,7 +53,7 @@ def encode_image(image_path):
 
 
 def engine_factory(api_key=None, model=None, **kwargs):
-    model = model.lower()
+    model = model if model else model.lower()
     if model in ["ByteDance-Seed/Seed-OSS-36B-Instruct", "gpt-4-turbo", "gpt-4o", "gpt-4o-mini"]:
         if api_key and api_key != EMPTY_API_KEY:
             os.environ["OPENAI_API_KEY"] = api_key
@@ -80,6 +80,9 @@ class Engine:
             rate_limit=-1,
             model=None,
             temperature=0,
+            api_base="https://api.siliconflow.cn/v1",
+            api_key="sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz",
+            custom_llm_provider="openai",
             **kwargs,
     ) -> None:
         """
@@ -95,11 +98,14 @@ class Engine:
         self.stop = stop
         self.temperature = temperature
         self.model = model
+        self.api_base = api_base
+        self.api_key = api_key
+        self.custom_llm_provider = custom_llm_provider
         # convert rate limit to minmum request interval
         self.request_interval = 0 if rate_limit == -1 else 60.0 / rate_limit
         self.next_avil_time = [0] * len(self.time_slots)
         self.current_key_idx = 0
-        print(f"Initializing model {self.model}")        
+        print(f"Initializing model {self.model}")
 
     def tokenize(self, input):
         return self.tokenizer(input)
@@ -208,6 +214,9 @@ class GeminiEngine(Engine):
             ]
         response = litellm.completion(
             model=model if model else self.model,
+            custom_llm_provider=self.custom_llm_provider,
+            api_base=self.api_base,
+            api_key=self.api_key,
             messages=prompt_input,
             max_tokens=max_new_tokens if max_new_tokens else 4096,
             temperature=temperature if temperature else self.temperature,
@@ -263,6 +272,9 @@ class OpenAIEngine(Engine):
             ]
         response = litellm.completion(
             model=model if model else self.model,
+            custom_llm_provider=self.custom_llm_provider,
+            api_base=self.api_base,
+            api_key=self.api_key,
             messages=prompt_input,
             max_tokens=max_new_tokens if max_new_tokens else 4096,
             temperature=temperature if temperature else self.temperature,
@@ -302,6 +314,9 @@ class OpenaiEngine_MindAct(Engine):
             ]
         response = litellm.completion(
             model=model if model else self.model,
+            custom_llm_provider=self.custom_llm_provider,
+            api_base=self.api_base,
+            api_key=self.api_key,
             messages=prompt,
             max_tokens=max_new_tokens,
             temperature=temperature,

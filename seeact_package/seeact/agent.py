@@ -37,7 +37,7 @@ class SeeActAgent:
     def __init__(self,
                  config_path=None,
                  save_file_dir="seeact_agent_files",
-                 default_task='Find the pdf of the paper "GPT-4V(ision) is a Generalist Web Agent, if Grounded"',
+                 default_task='请自动在浏览器中操作，去 ChinaXiv 网站上找到论文农业大模型：关键技术、应用分析与发展方向的 PDF 下载链接并下载它。',
                  default_website="https://www.bing.com/",
                  input_info=["screenshot"],
                  grounding_strategy="text_choice_som",  # [...,'pixel_2_stage']
@@ -63,7 +63,7 @@ class SeeActAgent:
                      "sources": True
                  },
                  rate_limit=-1,
-                 model="gpt-4o",
+                 model="ByteDance-Seed/Seed-OSS-36B-Instruct",
                  temperature=0.9
                  ):
 
