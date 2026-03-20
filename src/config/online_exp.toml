@@ -22,6 +22,7 @@ dev_mode=false # Developer mode toggle.
 
 [openai]
 # You can find your API key at https://platform.openai.com/account/api-keys.
+api_key = "sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
 rate_limit = -1 # Rate limit for API calls (-1 for no limit).
 model = "ByteDance-Seed/Seed-OSS-36B-Instruct" # Model name, indicating the use of GPT-4 with vision capabilities.
 temperature = 0 # Temperature setting for GPT's responses, controlling randomness.

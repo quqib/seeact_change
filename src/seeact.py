@@ -160,7 +160,7 @@ async def main(config, base_dir) -> None:
 
     # openai settings
     openai_config = config["openai"]
-    if openai_config["api_key"] == "sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz":
+    if openai_config["api_key"] == "请设置api":
         raise Exception(
             f"Please set your GPT API key first. (in {os.path.join(base_dir, 'config', 'demo_mode.toml')} by default)")
 

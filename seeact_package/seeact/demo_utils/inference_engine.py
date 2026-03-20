@@ -17,7 +17,7 @@ import time
 
 import backoff
 import openai
-from openai import (
+from openai.error import (
     APIConnectionError,
     APIError,
     RateLimitError,
@@ -212,6 +212,7 @@ class GeminiEngine(Engine):
                 {"role": "assistant", "content": [{"type": "text", "text": f"\n\n{ouput_0}"}]},
                 {"role": "user", "content": [{"type": "text", "text": prompt2}]}, 
             ]
+        print('ai请求数据发送中 33333.....')
         response = litellm.completion(
             model=model if model else self.model,
             custom_llm_provider=self.custom_llm_provider,
@@ -270,6 +271,7 @@ class OpenAIEngine(Engine):
                 {"role": "assistant", "content": [{"type": "text", "text": f"\n\n{ouput_0}"}]},
                 {"role": "user", "content": [{"type": "text", "text": prompt2}]}, 
             ]
+        print('ai请求数据发送中 22222.....')
         response = litellm.completion(
             model=model if model else self.model,
             custom_llm_provider=self.custom_llm_provider,
@@ -312,6 +314,7 @@ class OpenaiEngine_MindAct(Engine):
             prompt = [
                 {"role": "user", "content": prompt},
             ]
+        print('ai请求数据发送中 11111.....')
         response = litellm.completion(
             model=model if model else self.model,
             custom_llm_provider=self.custom_llm_provider,

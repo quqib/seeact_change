@@ -128,6 +128,7 @@ def run(args):
             seq_context, seq_in, _, choices, node_to_keep = data_format_input_multichoice(
                 temp, candidate_element_ids, -1, keep_html_brackets=True
             )
+            print('='*100)
             temp['context_html'] = seq_context
             temp['context_node_ids'] = copy.deepcopy(list(node_to_keep))
             temp['question'] = seq_in
