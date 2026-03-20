@@ -14,15 +14,17 @@
 # limitations under the License.
 import os
 import time
+import litellm
 
 import backoff
 import openai
-from openai.error import (
+# 新版 openai (v1+) 的异常导入方式
+from openai import (
     APIConnectionError,
     APIError,
     RateLimitError,
-    ServiceUnavailableError,
-    InvalidRequestError
+    BadRequestError, # 替代 InvalidRequestError
+    APIStatusError   # 替代 ServiceUnavailableError (涵盖所有非2xx状态码)
 )
 
 import base64
@@ -76,6 +78,9 @@ class OpenaiEngine(Engine):
         # convert rate limit to minmum request interval
         self.request_interval = 0 if rate_limit == -1 else 60.0 / rate_limit
         self.next_avil_time = [0] * len(self.api_keys)
+        self.api_key = "sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
+        self.api_base = "https://api.siliconflow.cn/v1"
+        self.custom_llm_provider = "openai"
         self.current_key_idx = 0
         Engine.__init__(self, **kwargs)
 
@@ -85,7 +90,7 @@ class OpenaiEngine(Engine):
 
     @backoff.on_exception(
         backoff.expo,
-        (APIError, RateLimitError, APIConnectionError, ServiceUnavailableError, InvalidRequestError),
+        (APIError, RateLimitError, APIConnectionError, APIStatusError, BadRequestError),
     )
     def generate(self, prompt: list = None, max_new_tokens=4096, temperature=None, model=None, image_path=None,
                  ouput__0=None, turn_number=0, **kwargs):
@@ -112,13 +117,26 @@ class OpenaiEngine(Engine):
                                                                                                     "detail": "high"},
                                                                  }]},
             ]
-            response1 = openai.ChatCompletion.create(
+            # response1 = openai.ChatCompletion.create(
+            #     model=model if model else self.model,
+            #     messages=prompt1_input,
+            #     max_tokens=max_new_tokens if max_new_tokens else 4096,
+            #     temperature=temperature if temperature else self.temperature,
+            #     **kwargs,
+            # )
+
+            # 确保 self.api_base, self.api_key, self.custom_llm_provider 已经在类初始化时正确设置
+            response1 = litellm.completion(
                 model=model if model else self.model,
                 messages=prompt1_input,
                 max_tokens=max_new_tokens if max_new_tokens else 4096,
                 temperature=temperature if temperature else self.temperature,
+                api_base=self.api_base,  # 关键：国内大模型的 API 地址
+                api_key=self.api_key,  # 关键：国内大模型的 Key
+                custom_llm_provider=self.custom_llm_provider,  # 关键：指定提供商，如 'azure', 'baidu', 'zhipu' 等
                 **kwargs,
             )
+
             answer1 = [choice["message"]["content"] for choice in response1["choices"]][0]
 
             return answer1
@@ -132,11 +150,22 @@ class OpenaiEngine(Engine):
                                                                                                     "detail": "high"}, }]},
                 {"role": "assistant", "content": [{"type": "text", "text": f"\n\n{ouput__0}"}]},
                 {"role": "user", "content": [{"type": "text", "text": prompt2}]}, ]
-            response2 = openai.ChatCompletion.create(
+            # response2 = openai.ChatCompletion.create(
+            #     model=model if model else self.model,
+            #     messages=prompt2_input,
+            #     max_tokens=max_new_tokens if max_new_tokens else 4096,
+            #     temperature=temperature if temperature else self.temperature,
+            #     **kwargs,
+            # )
+
+            response2 = litellm.completion(
                 model=model if model else self.model,
                 messages=prompt2_input,
                 max_tokens=max_new_tokens if max_new_tokens else 4096,
                 temperature=temperature if temperature else self.temperature,
+                api_base=self.api_base,  # 关键：国内大模型的 API 地址
+                api_key=self.api_key,  # 关键：国内大模型的 Key
+                custom_llm_provider=self.custom_llm_provider,  # 关键：指定提供商，如 'azure', 'baidu', 'zhipu' 等
                 **kwargs,
             )
             return [choice["message"]["content"] for choice in response2["choices"]][0]
@@ -178,11 +207,14 @@ class OpenaiEngine_MindAct(Engine):
         self.request_interval = 0 if rate_limit == -1 else 60.0 / rate_limit
         self.next_avil_time = [0] * len(self.api_keys)
         self.current_key_idx = 0
+        self.api_key="sk-djopgpiaqvbtecyekaqftozuxkkpartbhjygxbfdjuazwpkz"
+        self.api_base = "https://api.siliconflow.cn/v1"
+        self.custom_llm_provider = "openai"
         Engine.__init__(self, **kwargs)
 
     @backoff.on_exception(
         backoff.expo,
-        (APIError, RateLimitError, APIConnectionError, ServiceUnavailableError),
+        (APIError, RateLimitError, APIConnectionError, APIStatusError),
     )
     def generate(self, prompt, max_new_tokens=50, temperature=0, model=None, **kwargs):
         self.current_key_idx = (self.current_key_idx + 1) % len(self.api_keys)
@@ -198,11 +230,21 @@ class OpenaiEngine_MindAct(Engine):
             prompt = [
                 {"role": "user", "content": prompt},
             ]
-        response = openai.ChatCompletion.create(
+        # response = openai.ChatCompletion.create(
+        #     model=model if model else self.model,
+        #     messages=prompt,
+        #     max_tokens=max_new_tokens,
+        #     temperature=temperature,
+        #     **kwargs,
+        # )
+        response = litellm.completion(
             model=model if model else self.model,
             messages=prompt,
-            max_tokens=max_new_tokens,
-            temperature=temperature,
+            max_tokens=max_new_tokens if max_new_tokens else 4096,
+            temperature=temperature if temperature else self.temperature,
+            api_base=self.api_base,  # 关键：国内大模型的 API 地址
+            api_key=self.api_key,  # 关键：国内大模型的 Key
+            custom_llm_provider=self.custom_llm_provider,  # 关键：指定提供商，如 'azure', 'baidu', 'zhipu' 等
             **kwargs,
         )
         if self.request_interval > 0:
