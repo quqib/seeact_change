@@ -16,8 +16,8 @@ import os
 import time
 
 import backoff
-import openai
-from openai.error import (
+# 新版 openai (v1+) 的异常导入方式
+from openai import (
     APIConnectionError,
     APIError,
     RateLimitError,

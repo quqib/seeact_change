@@ -37,7 +37,7 @@ class SeeActAgent:
     def __init__(self,
                  config_path=None,
                  save_file_dir="seeact_agent_files",
-                 default_task='请自动在浏览器中操作，去 ChinaXiv 网站上找到论文农业大模型：关键技术、应用分析与发展方向的 PDF 下载链接并下载它。',
+                 default_task='请自动在浏览器中操作，访问"ChinaXiv"网站,在上面找到论文农业大模型：关键技术、应用分析与发展方向的 PDF 下载链接并下载它。',
                  default_website="https://www.bing.com/",
                  input_info=["screenshot"],
                  grounding_strategy="text_choice_som",  # [...,'pixel_2_stage']

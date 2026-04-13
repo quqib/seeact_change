@@ -27,8 +27,11 @@ from openai import (
     APIStatusError   # 替代 ServiceUnavailableError (涵盖所有非2xx状态码)
 )
 
+
 import base64
 
+
+litellm.set_verbose = True
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -112,11 +115,14 @@ class OpenaiEngine(Engine):
             prompt1_input = [
                 {"role": "system", "content": [{"type": "text", "text": prompt0}]},
                 {"role": "user",
-                 "content": [{"type": "text", "text": prompt1}, {"type": "image_url", "image_url": {"url":
-                                                                                                        f"data:image/jpeg;base64,{base64_image}",
-                                                                                                    "detail": "high"},
-                                                                 }]},
+                 "content": [{"type": "text", "text": prompt1}]},
             ]
+            #
+            # , {"type": "image_url", "image_url": {"url":
+            #                                           f"data:image/jpeg;base64,{base64_image}",
+            #                                       "detail": "high"},
+            #    }
+
             # response1 = openai.ChatCompletion.create(
             #     model=model if model else self.model,
             #     messages=prompt1_input,
@@ -134,7 +140,8 @@ class OpenaiEngine(Engine):
                 api_base=self.api_base,  # 关键：国内大模型的 API 地址
                 api_key=self.api_key,  # 关键：国内大模型的 Key
                 custom_llm_provider=self.custom_llm_provider,  # 关键：指定提供商，如 'azure', 'baidu', 'zhipu' 等
-                **kwargs,
+                # **kwargs,
+                **{},
             )
 
             answer1 = [choice["message"]["content"] for choice in response1["choices"]][0]
@@ -145,11 +152,14 @@ class OpenaiEngine(Engine):
             prompt2_input = [
                 {"role": "system", "content": [{"type": "text", "text": prompt0}]},
                 {"role": "user",
-                 "content": [{"type": "text", "text": prompt1}, {"type": "image_url", "image_url": {"url":
-                                                                                                        f"data:image/jpeg;base64,{base64_image}",
-                                                                                                    "detail": "high"}, }]},
+                 "content": [{"type": "text", "text": prompt1}]},
                 {"role": "assistant", "content": [{"type": "text", "text": f"\n\n{ouput__0}"}]},
                 {"role": "user", "content": [{"type": "text", "text": prompt2}]}, ]
+            #
+            # , {"type": "image_url", "image_url": {"url":
+            #                                           f"data:image/jpeg;base64,{base64_image}",
+            #                                       "detail": "high"}, }
+
             # response2 = openai.ChatCompletion.create(
             #     model=model if model else self.model,
             #     messages=prompt2_input,
